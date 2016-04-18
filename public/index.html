@@ -1,13 +1,17 @@
 <!doctype html>
-<html ng-app>
+<html ng-app="tttApp">
 <head>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
+  <script src="tttApp.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    var socket = io.connect('http://localhost');
-    socket.on('news', function (data) {
-      console.log(data);
-      socket.emit('my other event', {my: 'data'});
+    var socket = io();
+    socket.on("session", function(session) {
+      console.log("Connected. My session ID is", session);
+    })
+    socket.on('partner', function (data) {
+      console.log("received partner", data);
+//      socket.emit('my other event', {my: 'data'});
     });
   </script>
 </head>

@@ -22,6 +22,20 @@ app.set('port', port);
 var server = http.createServer(app);
 
 /**
+ * Socket.io
+ */
+var io = require('socket.io')(server);
+io.on('connection', function (socket) {
+  console.log("Connected", socket);
+
+  /*socket.emit('news', { hello: 'world' });
+  socket.on('my other event', function (data) {
+    console.log(data);
+  });*/
+});
+
+
+/**
  * Listen on provided port, on all network interfaces.
  */
 
@@ -58,9 +72,7 @@ function onError(error) {
     throw error;
   }
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+  var bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
