@@ -189,9 +189,9 @@ function manageSession(socket, callback) {
 
 /*
  board: [
-   [null, null, null],
-   [null, null, null],
-   [null, null, null]
+ [null, null, null],
+ [null, null, null],
+ [null, null, null]
  ]
  */
 function get(board, row, column) {
@@ -202,7 +202,7 @@ function checkBoard(session) {
   var board = session.board;
   var horiz1, horiz2, horiz3, vert1, vert2, vert3;
 
-  for (var i=0; i < 3; i++) {
+  for (var i = 0; i < 3; i++) {
     horiz1 = get(board, i, 0);
     horiz2 = get(board, i, 1);
     horiz3 = get(board, i, 2);
@@ -251,10 +251,11 @@ io.on("connection", function (socket) {
   socket.emit("session", clientId);
 
   //handle new user
-  manageSession(socket, function(){});
+  manageSession(socket, function () {
+  });
 
   //handle moves
-  socket.on("action", function(event) {
+  socket.on("action", function (event) {
     var userId = socket.id;
     var session = getSessionByUserid(userId);
     if (session) {
@@ -285,12 +286,12 @@ io.on("connection", function (socket) {
             winningPlayer = session.userX;
             losingPlayer = session.userO;
           }
-          getClient(winningPlayer).emit("gameOver", {status: 1, message: "You've won!"});
-          getClient(losingPlayer).emit("gameOver", {status: 0, message: "You've lost!"});
+          getClient(winningPlayer).emit("gameOver", {status: 1, message: "You win!"});
+          getClient(losingPlayer).emit("gameOver", {status: 0, message: "You lose"});
           session.winner = winningPlayer;
         }
         else if (emptyCheck(session)) {
-          io.to(session.id).emit("gameOver", {status: 2, message: "It's a tie!"});
+          io.to(session.id).emit("gameOver", {status: 2, message: "Cat’s game (Tie)!"});
         }
       }
       else {
@@ -314,7 +315,8 @@ io.on("connection", function (socket) {
         console.log("No active players remain");
       }
       var partnerSocket = getClient(partnerId);
-      manageSession(partnerSocket, function(){});
+      manageSession(partnerSocket, function () {
+      });
     }
     else {
       console.log("No active players remain");
