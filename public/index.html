@@ -1,17 +1,29 @@
 <!doctype html>
 <html ng-app="tttApp">
 <head>
+  <link rel='stylesheet' href='/css/style.css'>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
-  <script src="tttApp.js"></script>
   <script src="/socket.io/socket.io.js"></script>
+  <!-- Angular scripts go here -->
+  <script src="js/ui-bootstrap-custom-1.3.2.min.js"></script>
+  <script src="js/ui-bootstrap-custom-tpls-1.3.2.min.js"></script>
+
+  <script src="tttApp.js"></script>
+  <script src="js/services.js"></script>
   <script>
     var socket = io();
-    socket.on("session", function(session) {
-      console.log("Connected. My session ID is", session);
+    socket.on("session", function (sessionId) {
+      console.log("Connected. My session ID is", sessionId, socket.id);
     })
     socket.on('partner', function (data) {
       console.log("received partner", data);
-//      socket.emit('my other event', {my: 'data'});
+      //reset the game because this event takes care of new user or orphanage
+    });
+    socket.on("disconnect", function () {
+
+    });
+    socket.on("reconnect", function () {
+
     });
   </script>
 </head>
@@ -22,5 +34,16 @@
   <hr>
   <h1>Hello {{yourName}}!</h1>
 </div>
+<div ng-controller="TicTacToeController">
+  <div>Session id: <span>{{sessionId}}</span></div>
+  <table border="1">
+    <tr ng-repeat="row in [0,1,2]">
+      <td ng-repeat="column in [0,1,2]" ng-click="cellClick(row,column)" ng-class="cellClass(row,column)">
+        {{cellText(row,column)}}
+      </td>
+    </tr>
+  </table>
+</div>
+
 </body>
 </html>

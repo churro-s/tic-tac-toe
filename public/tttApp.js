@@ -1,29 +1,66 @@
-angular.module('tttApp', [])
-  .controller('TodoListController', function () {
-    var todoList = this;
+/*jshint -W098 */
+"use strict";
 
-    todoList.todos = [
-      {text: 'learn angular', done: true},
-      {text: 'build an angular app', done: false}];
+var tttApp =
+  angular.module("tttApp", ["ui.bootstrap"])
+    .controller("TicTacToeController", function ($scope, socket) {
 
-    todoList.addTodo = function () {
-      todoList.todos.push({text: todoList.todoText, done: false});
-      todoList.todoText = '';
-    };
+      $scope.sessionId = "No session";
+      function resetBoard() {
+        $scope.board = [
+          [null, null, null],
+          [null, null, null],
+          [null, null, null]
+        ];
+      }
+      resetBoard();
 
-    todoList.remaining = function () {
-      var count = 0;
-      angular.forEach(todoList.todos, function (todo) {
-        count += todo.done ? 0 : 1;
+      socket.on("session", function (sessionId) {
+        
+        $scope.sessionId = sessionId;
       });
-      return count;
-    };
 
-    todoList.archive = function () {
-      var oldTodos = todoList.todos;
-      todoList.todos = [];
-      angular.forEach(oldTodos, function (todo) {
-        if (!todo.done) todoList.todos.push(todo);
+      $scope.players = {
+        X: "X",
+        O: "O"
+      };
+      socket.on("partner", function (data) {
+        console.log("received partner", data);
+        alert("Received a new partner, the game has been reset");
+        resetBoard();
       });
-    };
-  });
+
+
+      function getCell(row, column) {
+        return $scope.board[row][column];
+      }
+
+      function setCell(row, column, value) {
+        $scope.board[row][column] = value;
+      }
+
+
+      $scope.cellClass = function (row, column) {
+        var value = getCell(row, column);
+        return "cell cell-" + value;
+      };
+      $scope.cellText = function (row, column) {
+        var value = getCell(row, column);
+        return value ? value : " ";
+      };
+
+      $scope.cellClick = function (row, column) {
+        if ($scope.winner) {
+          alert("Already game over.")
+          return;
+        }
+        if ($scope.player != $scope.currentPlayer) {
+          alert("Not your turn.")
+          return;
+        }
+        setCell(row, column, $scope.player)
+        checkBoard()
+        $scope.currentPlayer = nextPlayer($scope.currentPlayer);
+      }
+
+    });
