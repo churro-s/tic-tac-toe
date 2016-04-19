@@ -8,7 +8,7 @@
  */
 
 var tttApp =
-  angular.module("tttApp", ['ngAnimate', 'toaster'])
+  angular.module("tttApp", ["ngAnimate", "toaster"])
     .controller("TicTacToeController", function ($scope, socket, toaster) {
 
       $scope.sessionId = "No session";
@@ -22,44 +22,49 @@ var tttApp =
         ];
         $scope.gameOver = false;
       }
+
       resetBoard();
 
       socket.on("session", function (sessionId) {
         $scope.sessionId = sessionId;
-        toaster.pop('success', "Board Reset");
+        toaster.pop("success", "Board Reset");
         resetBoard();
       });
 
       socket.on("partner", function (data) {
-        $scope.partner = data || "Waiting for partner";
+        $scope.partner = data.partner || "Waiting for partner";
+        $scope.sign = data.sign;
         console.log("received partner", data);
         resetBoard();
       });
 
-      socket.on("boardChange", function(data) {
+      socket.on("boardChange", function (data) {
         $scope.board = data;
       });
 
-      socket.on("userError", function(message) {
-        toaster.pop('error', message);
+      socket.on("userError", function (message) {
+        toaster.pop("error", message);
       });
 
-      socket.on("gameOver", function(data) {
+      socket.on("gameOver", function (data) {
         $scope.gameOver = true;
-        if (data && data.status) {
-          toaster.pop({
-            type: "success",
-            title: data.message,
-            timeout: 5000
-          });
+        var alertType;
+        switch (data.status) {
+          case 0:
+            alertType = "error";
+            break;
+          case 1:
+            alertType = "success";
+            break;
+          case 2:
+            alertType = "warning";
+            break;
         }
-        else {
-          toaster.pop({
-            type: "warning",
-            title: data.message,
-            timeout: 5000
-          });
-        }
+        toaster.pop({
+          type: alertType,
+          title: data.message,
+          timeout: 5000
+        });
       });
 
       function getCell(row, column) {
@@ -69,12 +74,6 @@ var tttApp =
       function setCell(row, column, value) {
         $scope.board[row][column] = value;
       }
-
-
-      $scope.cellClass = function (row, column) {
-        var value = getCell(row, column);
-        return "cell cell-" + value;
-      };
 
       //What text to display in cell
       $scope.cellText = function (row, column) {

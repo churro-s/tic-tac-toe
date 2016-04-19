@@ -1,40 +1,35 @@
 /*jshint -W098 */
-'use strict';
+"use strict";
 
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
+var express = require("express");
+var path = require("path");
+var favicon = require("serve-favicon");
+var logger = require("morgan");
+var cookieParser = require("cookie-parser");
+var bodyParser = require("body-parser");
 var _ = require("lodash");
 
-/*var routes = require('./routes/index');
- var users = require('./routes/users');*/
-var api = require('./api');
+/*var routes = require("./routes/index");
+ var users = require("./routes/users");*/
 var app = express();
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "jade");
 
 // uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+//app.use(favicon(path.join(__dirname, "public", "favicon.ico")));
 
-app.use(logger('dev'));
+app.use(logger("dev"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/api", api);
-
-/*app.use('/', routes);
- app.use('/users', users);*/
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-  var err = new Error('Not Found');
+  var err = new Error("Not Found");
   err.status = 404;
   next(err);
 });
@@ -43,10 +38,10 @@ app.use(function (req, res, next) {
 
 // development error handler
 // will print stacktrace
-if (app.get('env') === 'development') {
+if (app.get("env") === "development") {
   app.use(function (err, req, res, next) {
     res.status(err.status || 500);
-    res.render('error', {
+    res.render("error", {
       message: err.message,
       error: err
     });
@@ -57,14 +52,14 @@ if (app.get('env') === 'development') {
 // no stacktraces leaked to user
 app.use(function (err, req, res, next) {
   res.status(err.status || 500);
-  res.render('error', {
+  res.render("error", {
     message: err.message,
     error: {}
   });
 });
 
 //The HTTP server
-var server = require('http').Server(app);
+var server = require("http").Server(app);
 
 /**
  * Simple function to generate a unique ID based on current time
@@ -136,7 +131,7 @@ function deleteSession(session) {
 /**
  * Socket.io
  */
-var io = require('socket.io')(server);
+var io = require("socket.io")(server);
 
 //Keep track of hanging session (single player waiting for partner)
 var waitingClientId;
@@ -176,9 +171,9 @@ function manageSession(socket, callback) {
           }
           else {//both clients connected to room SUCCESS
             console.log("Connected  client", newClientId, "with", waitingClientId, " in session ID", sessionId);
-            io.to(sessionId).emit('boardChange', session.board);
-            socket.emit("partner", waitingClientId);
-            waitingSocket.emit("partner", newClientId);
+            io.to(sessionId).emit("boardChange", session.board);
+            socket.emit("partner", {partner: waitingClientId, sign: "X"});
+            waitingSocket.emit("partner", {partner: newClientId, sign: "O"});
             waitingClientId = null;
             return callback(null, session);
           }
@@ -187,7 +182,7 @@ function manageSession(socket, callback) {
     });
   }
   else {
-    socket.emit("partner", null);
+    socket.emit("partner", {});
     waitingClientId = newClientId;
   }
 }
@@ -233,9 +228,21 @@ function checkBoard(session) {
     return horiz1;//diagonal win (top-right to bottom-left)
   }
 }
+function emptyCheck(session) {
+  var empty = false, board = session.board;
+  // check for any empty cell
+  for (var i = 0; i < 3; i++) {
+    for (var j = 0; j < 3; j++) {
+      if (!get(board, i, j)) {
+        empty = true;
+      }
+    }
+  }
+  return !empty;
+}
 
 //Socket connection handler
-io.on('connection', function (socket) {
+io.on("connection", function (socket) {
 
   addClient(socket);
 
@@ -266,6 +273,7 @@ io.on('connection', function (socket) {
         session.board[event.row][event.col] = char;
         session.nextPlayer = opponent;
         io.to(session.id).emit("boardChange", session.board);
+
         var winner = checkBoard(session);
         if (winner) {
           var winningPlayer, losingPlayer;
@@ -280,6 +288,9 @@ io.on('connection', function (socket) {
           getClient(winningPlayer).emit("gameOver", {status: 1, message: "You've won!"});
           getClient(losingPlayer).emit("gameOver", {status: 0, message: "You've lost!"});
           session.winner = winningPlayer;
+        }
+        else if (emptyCheck(session)) {
+          io.to(session.id).emit("gameOver", {status: 2, message: "It's a tie!"});
         }
       }
       else {
@@ -315,9 +326,9 @@ io.on('connection', function (socket) {
 /**
  * Start server
  */
-var port = process.env.PORT || '8000';
+var port = process.env.PORT || "8000";
 server.listen(port, function () {
-  console.log('listening on', server.address());
+  console.log("listening on", server.address());
 });
 
 
