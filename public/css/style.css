@@ -1,0 +1,16 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+.cell {
+  width: 100px;
+  height: 100px;
+  font: 90px sans-serif;
+  text-align: center;
+  vertical-align: center;
+}

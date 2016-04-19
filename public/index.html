@@ -1,0 +1,35 @@
+<!doctype html>
+<html ng-app="tttApp">
+<head>
+  <link rel='stylesheet' href='/css/style.css'>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
+
+  <script src="/socket.io/socket.io.js"></script>
+
+  <!-- toast notification stuff -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/angularjs-toaster/1.1.0/toaster.min.css" rel="stylesheet"/>
+  <script src="https://code.angularjs.org/1.5.3/angular-animate.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angularjs-toaster/1.1.0/toaster.min.js"></script>
+
+  <!-- Custom Angular scripts -->
+  <script src="tttApp.js"></script>
+  <script src="js/services.js"></script>
+</head>
+<body>
+<toaster-container toaster-options="{'time-out':1000}"></toaster-container>
+
+<div ng-controller="TicTacToeController">
+  <div>User id: <span>{{sessionId}}</span>&nbsp;<span ng-show="sign">({{sign}}'s)</span></div>
+  <div>Partner: <span>{{partner}}</span></div>
+  <table border="1">
+    <tr ng-repeat="row in [0,1,2]">
+      <td ng-repeat="column in [0,1,2]" ng-click="cellClick(row,column)" class="cell">
+        {{cellText(row,column)}}
+      </td>
+    </tr>
+  </table>
+  <div ng-show="gameOver">Game over! Refresh page to start a new game</div>
+</div>
+
+</body>
+</html>
