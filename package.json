@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": " DEBUG=myapp:* nodemon --debug app.js"
+    "start-dev": " DEBUG=myapp:* nodemon --debug app.js",
+    "start": "node app.js"
   },
   "dependencies": {
     "body-parser": "~1.13.2",
